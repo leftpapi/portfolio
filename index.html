@@ -58,24 +58,27 @@
     .avatar-img { position: relative; width: clamp(128px, 18vw, 176px); height: clamp(128px, 18vw, 176px); object-fit: contain; filter: drop-shadow(0 0 30px rgba(59,130,246,0.5)); display: block; }
     .hero-name { font-size: clamp(48px, 9vw, 80px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 12px; text-align: center; animation: fadeUp 0.6s ease 0.35s both; }
 
-    /* ---- Discord status dot (on avatar, Roblox/Discord style) ---- */
-    .discord-status-dot {
-      position: absolute;
-      bottom: 6%; right: 6%;
-      width: 20%; height: 20%;
-      min-width: 18px; min-height: 18px;
-      max-width: 28px; max-height: 28px;
-      border-radius: 50%;
-      background: #747f8d;
-      border: 3px solid #030308;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      transition: background 0.3s ease;
-      z-index: 2;
+    /* ---- Discord status badge (under title) ---- */
+    .discord-status-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s ease 0.3s both;
     }
-    .discord-status-dot.online { background: #3ba55d; }
-    .discord-status-dot.idle { background: #faa61a; }
-    .discord-status-dot.dnd { background: #ed4245; }
-    .discord-status-dot.offline { background: #747f8d; }
+    .discord-status-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #747f8d;
+      box-shadow: 0 0 8px rgba(116,127,141,0.6);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      flex-shrink: 0;
+    }
+    .discord-status-dot.online { background: #3ba55d; box-shadow: 0 0 8px rgba(59,165,93,0.7); }
+    .discord-status-dot.idle { background: #faa61a; box-shadow: 0 0 8px rgba(250,166,26,0.7); }
+    .discord-status-dot.dnd { background: #ed4245; box-shadow: 0 0 8px rgba(237,66,69,0.7); }
+    .discord-status-dot.offline { background: #747f8d; box-shadow: 0 0 8px rgba(116,127,141,0.6); }
+    .discord-status-word { font-size: 12px; font-weight: 500; letter-spacing: 0.04em; color: rgba(255,255,255,0.6); }
 
     .badge-row {
       display: flex; align-items: center; justify-content: center;
@@ -127,13 +130,15 @@
       aspect-ratio: 4 / 3;
       cursor: zoom-in;
       overflow: hidden;
+      background: rgba(255,255,255,0.02);
+      display: flex; align-items: center; justify-content: center;
     }
     .carousel-slide img {
       width: 100%; height: 100%;
-      object-fit: cover; display: block;
+      object-fit: contain; display: block;
       transition: transform 0.5s ease;
     }
-    .carousel-slide:hover img { transform: scale(1.04); }
+    .carousel-slide:hover img { transform: scale(1.02); }
     .carousel-arrow {
       position: absolute;
       top: 50%; transform: translateY(-50%);
@@ -249,12 +254,17 @@
         <div class="avatar-float">
           <div class="avatar-glow"></div>
           <img class="avatar-img" src="avatar.png" alt="leftpapi avatar" />
-          <span id="discord-status-dot" class="discord-status-dot offline" title="Loading status…"></span>
         </div>
       </div>
 
       <h1 class="hero-name">left<span>papi</span></h1>
       <p class="hero-title">GFX Designer &nbsp;·&nbsp; Coder &nbsp;·&nbsp; Content Creator</p>
+
+      <div id="discord-status-badge" class="discord-status-badge">
+        <span id="discord-status-dot" class="discord-status-dot offline"></span>
+        <span id="discord-status-word" class="discord-status-word">Loading status…</span>
+      </div>
+
       <div class="badge-row">
         <div class="age-badge">15 years old</div>
         <div class="age-badge">He/Him</div>
@@ -532,6 +542,7 @@
 
     async function updateDiscordStatus() {
       const dot = document.getElementById('discord-status-dot');
+      const word = document.getElementById('discord-status-word');
       try {
         const res = await fetch(`https://api.lanyard.rest/v1/users/${LANYARD_USER_ID}`, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -540,11 +551,11 @@
 
         const status = json.data.discord_status || 'offline';
         dot.className = 'discord-status-dot ' + status;
-        dot.title = statusLabels[status] || status;
+        word.textContent = statusLabels[status] || status;
       } catch (err) {
         console.error('Lanyard fetch failed:', err);
         dot.className = 'discord-status-dot offline';
-        dot.title = 'Status unavailable';
+        word.textContent = 'Status unavailable';
       }
     }
 
