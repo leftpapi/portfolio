@@ -20,21 +20,24 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       cursor: pointer; user-select: none; background: #030308;
       transition: opacity 0.7s ease, transform 0.7s ease;
+      overflow: hidden;
     }
     #splash.exiting { opacity: 0; transform: scale(1.04); pointer-events: none; }
     .splash-glow { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-    .splash-glow::after { content: ''; width: min(600px, 90vw); height: min(600px, 90vw); border-radius: 50%; background: rgba(37,99,235,0.2); filter: blur(120px); }
-    .splash-grid { position: absolute; inset: 0; opacity: 0.04; pointer-events: none; background-image: linear-gradient(rgba(99,179,237,1) 1px, transparent 1px), linear-gradient(90deg, rgba(99,179,237,1) 1px, transparent 1px); background-size: 60px 60px; }
+    .splash-glow::after { content: ''; width: min(680px, 95vw); height: min(680px, 95vw); border-radius: 50%; background: rgba(37,99,235,0.22); filter: blur(130px); animation: glowPulse 6s ease-in-out infinite; }
+    .splash-glow-accent { position: absolute; top: 12%; right: 8%; width: min(360px, 60vw); height: min(360px, 60vw); border-radius: 50%; background: rgba(96,165,250,0.14); filter: blur(110px); pointer-events: none; animation: driftAccent 10s ease-in-out infinite; }
+    .splash-grid { position: absolute; inset: 0; opacity: 0.05; pointer-events: none; background-image: linear-gradient(rgba(99,179,237,1) 1px, transparent 1px), linear-gradient(90deg, rgba(99,179,237,1) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(circle at 50% 45%, #000 30%, transparent 75%); }
     .splash-content { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 24px; animation: fadeUp 0.8s ease 0.15s both; }
-    .splash-welcome { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(96,165,250,0.6); margin-bottom: 32px; font-weight: 500; animation: pulseOpacity 3s ease-in-out infinite; }
-    .splash-title { font-size: clamp(56px, 15vw, 96px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 8px; }
+    .splash-welcome { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(96,165,250,0.65); margin-bottom: 28px; font-weight: 500; animation: pulseOpacity 3s ease-in-out infinite; }
+    .splash-title { font-size: clamp(56px, 15vw, 100px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 8px; text-shadow: 0 0 60px rgba(59,130,246,0.35); }
     .splash-title span { color: #60a5fa; }
-    .splash-subtitle { color: rgba(255,255,255,0.4); font-size: clamp(13px, 2vw, 16px); margin-top: 24px; letter-spacing: 0.05em; }
+    .splash-subtitle { color: rgba(255,255,255,0.45); font-size: clamp(13px, 2vw, 16px); margin-top: 22px; letter-spacing: 0.05em; }
     .splash-cta { margin-top: 64px; display: flex; flex-direction: column; align-items: center; gap: 8px; animation: pulseOpacity 2.5s ease-in-out infinite; }
-    .splash-cta-line { width: 1px; height: 48px; background: linear-gradient(to bottom, transparent, rgba(96,165,250,0.6), transparent); }
-    .splash-cta-text { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
-    #main { display: none; opacity: 0; transition: opacity 0.6s ease; }
+    .splash-cta-text { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+    #main { display: none; opacity: 0; transition: opacity 0.6s ease; position: relative; }
     #main.visible { opacity: 1; }
+    #bg-canvas { position: absolute; top: 0; left: 0; width: 100%; z-index: 0; pointer-events: none; }
+    .container { z-index: 1; }
     .ambient-glow { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 800px; max-width: 100vw; height: 400px; background: rgba(37,99,235,0.1); filter: blur(140px); border-radius: 50%; pointer-events: none; }
 
     /* ---- Container now scales nicely across phone / tablet / desktop ---- */
@@ -50,34 +53,42 @@
     }
 
     .avatar-wrap { margin-bottom: 24px; position: relative; animation: bounceDown 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s both; }
-    .avatar-float { animation: float 4s ease-in-out infinite; }
+    .avatar-float { position: relative; display: inline-block; animation: float 4s ease-in-out infinite; }
     .avatar-glow { position: absolute; inset: 0; background: rgba(59,130,246,0.2); filter: blur(40px); border-radius: 50%; transform: scale(1.5); pointer-events: none; }
     .avatar-img { position: relative; width: clamp(128px, 18vw, 176px); height: clamp(128px, 18vw, 176px); object-fit: contain; filter: drop-shadow(0 0 30px rgba(59,130,246,0.5)); display: block; }
     .hero-name { font-size: clamp(48px, 9vw, 80px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 12px; text-align: center; animation: fadeUp 0.6s ease 0.35s both; }
 
-    /* ---- Discord status badge (under avatar) ---- */
-    .discord-status-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 6px 14px; border-radius: 999px;
+    /* ---- Discord status dot (on avatar, Roblox/Discord style) ---- */
+    .discord-status-dot {
+      position: absolute;
+      bottom: 6%; right: 6%;
+      width: 20%; height: 20%;
+      min-width: 18px; min-height: 18px;
+      max-width: 28px; max-height: 28px;
+      border-radius: 50%;
+      background: #747f8d;
+      border: 3px solid #030308;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      transition: background 0.3s ease;
+      z-index: 2;
+    }
+    .discord-status-dot.online { background: #3ba55d; }
+    .discord-status-dot.idle { background: #faa61a; }
+    .discord-status-dot.dnd { background: #ed4245; }
+    .discord-status-dot.offline { background: #747f8d; }
+
+    .age-badge {
+      display: inline-flex; align-items: center;
+      padding: 5px 14px; border-radius: 999px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 20px;
-      animation: fadeUp 0.6s ease 0.3s both;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 40px;
+      animation: fadeUp 0.6s ease 0.42s both;
     }
-    .discord-status-dot {
-      width: 9px; height: 9px; border-radius: 50%;
-      background: #747f8d;
-      box-shadow: 0 0 8px rgba(116,127,141,0.6);
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-      flex-shrink: 0;
-    }
-    .discord-status-dot.online { background: #3ba55d; box-shadow: 0 0 8px rgba(59,165,93,0.7); }
-    .discord-status-dot.idle { background: #faa61a; box-shadow: 0 0 8px rgba(250,166,26,0.7); }
-    .discord-status-dot.dnd { background: #ed4245; box-shadow: 0 0 8px rgba(237,66,69,0.7); }
-    .discord-status-dot.offline { background: #747f8d; box-shadow: 0 0 8px rgba(116,127,141,0.6); }
-    .discord-status-word { font-size: 12px; font-weight: 500; letter-spacing: 0.04em; color: rgba(255,255,255,0.6); }
     .hero-name span { color: #60a5fa; }
-    .hero-title { color: rgba(255,255,255,0.5); font-size: clamp(11px, 1.6vw, 14px); letter-spacing: 0.2em; text-transform: uppercase; text-align: center; margin-bottom: 40px; animation: fadeUp 0.6s ease 0.4s both; }
+    .hero-title { color: rgba(255,255,255,0.5); font-size: clamp(11px, 1.6vw, 14px); letter-spacing: 0.2em; text-transform: uppercase; text-align: center; margin-bottom: 18px; animation: fadeUp 0.6s ease 0.4s both; }
     .about-card { width: 100%; max-width: 640px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.03); padding: 28px 32px; text-align: center; margin-bottom: 32px; animation: fadeUp 0.6s ease 0.45s both; }
     .about-card p { color: rgba(255,255,255,0.75); font-size: clamp(15px, 1.6vw, 17px); line-height: 1.75; }
     .about-card .accent { color: #60a5fa; font-weight: 500; }
@@ -87,24 +98,75 @@
     .section-divider .line { flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
     .section-divider h2 { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.4); font-weight: 500; white-space: nowrap; }
 
-    /* ---- Gallery: responsive grid, more columns on wider screens ---- */
-    .gallery {
+    /* ---- Carousel: showcase stacks one at a time, arrows to navigate ---- */
+    .carousel {
+      position: relative;
       width: 100%;
-      max-width: 900px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      max-width: 640px;
       margin-bottom: 64px;
       animation: fadeUp 0.7s ease 0.7s both;
     }
-    .gallery-item { position: relative; overflow: hidden; border-radius: 16px; cursor: zoom-in; outline: 1px solid rgba(255,255,255,0.1); outline-offset: -1px; transition: outline-color 0.3s ease; }
-    .gallery-item:hover { outline-color: rgba(59,130,246,0.45); }
-    .gallery-item.featured { grid-row: span 2; }
-    .item-inner { position: relative; width: 100%; height: 100%; overflow: hidden; }
-    .gallery-item.featured .item-inner { aspect-ratio: 1 / 1; min-height: 300px; }
-    .gallery-item:not(.featured) .item-inner { aspect-ratio: 4 / 3; }
-    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
-    .gallery-item:hover img { transform: scale(1.06); }
+    .carousel-viewport {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 16px;
+      outline: 1px solid rgba(255,255,255,0.1);
+      outline-offset: -1px;
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+    .carousel-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      cursor: zoom-in;
+      overflow: hidden;
+    }
+    .carousel-slide img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      transition: transform 0.5s ease;
+    }
+    .carousel-slide:hover img { transform: scale(1.04); }
+    .carousel-arrow {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(3,3,8,0.6);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .carousel-arrow:hover { background: rgba(59,130,246,0.25); border-color: rgba(59,130,246,0.5); }
+    .carousel-arrow.prev { left: -14px; }
+    .carousel-arrow.next { right: -14px; }
+    .carousel-dots {
+      display: flex; justify-content: center; gap: 8px;
+      margin-top: 16px;
+    }
+    .carousel-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .carousel-dot.active { background: #60a5fa; transform: scale(1.3); }
+    @media (min-width: 900px) {
+      .carousel { max-width: 720px; }
+      .carousel-arrow.prev { left: -52px; }
+      .carousel-arrow.next { right: -52px; }
+    }
+    @media (max-width: 640px) {
+      .carousel-arrow.prev { left: 8px; }
+      .carousel-arrow.next { right: 8px; }
+    }
 
     .discord-cta-card { width: 100%; max-width: 480px; border-radius: 20px; border: 1px solid rgba(59,130,246,0.2); background: rgba(59,130,246,0.05); padding: 28px 32px; text-align: center; margin-bottom: 48px; animation: fadeUp 0.6s ease 0.82s both; }
     .discord-eyebrow { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 10px; }
@@ -116,8 +178,8 @@
     @media (min-width: 480px) { .links-row { flex-direction: row; } }
     .link-btn { flex: 1; text-align: center; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; text-decoration: none; transition: background 0.2s ease, color 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
     .link-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .link-btn.roblox { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.8); }
-    .link-btn.roblox:hover { background: rgba(255,255,255,0.09); color: #fff; }
+    .link-btn.roblox { border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.85); }
+    .link-btn.roblox:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.3); }
     .link-btn.youtube { border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); color: rgba(248,113,113,0.9); }
     .link-btn.youtube:hover { background: rgba(239,68,68,0.12); color: #fca5a5; }
     .footer { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
@@ -132,36 +194,35 @@
     /* ---- Desktop / larger screens ---- */
     @media (min-width: 900px) {
       .container { max-width: 1040px; padding: 80px 32px 110px; }
-      .gallery { grid-template-columns: 2fr 1fr 1fr; max-width: 100%; }
     }
 
     /* ---- Mobile ---- */
     @media (max-width: 560px) {
-      .gallery { grid-template-columns: 1fr; }
-      .gallery-item.featured { grid-row: span 1; }
-      .gallery-item.featured .item-inner { aspect-ratio: 1 / 1; min-height: unset; }
-      .gallery-item:not(.featured) .item-inner { aspect-ratio: 16 / 9; }
       .container { padding: 48px 16px 80px; }
       .about-card { padding: 22px 20px; }
       .discord-cta-card { padding: 22px 20px; }
     }
+    #splash-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes bounceDown { 0% { opacity: 0; transform: translateY(-120px) scale(0.6); } 60% { transform: translateY(12px) scale(1.05); } 80% { transform: translateY(-6px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     @keyframes pulseOpacity { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+    @keyframes glowPulse { 0%, 100% { opacity: 0.85; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+    @keyframes driftAccent { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-20px, 25px); } }
   </style>
 </head>
 <body>
 
   <div id="splash" onclick="enter()">
     <div class="splash-glow"></div>
+    <div class="splash-glow-accent"></div>
+    <canvas id="splash-canvas"></canvas>
     <div class="splash-grid"></div>
     <div class="splash-content">
       <div class="splash-welcome">Welcome</div>
       <h1 class="splash-title">left<span>papi</span></h1>
       <p class="splash-subtitle">GFX Designer · Coder · Content Creator</p>
       <div class="splash-cta">
-        <div class="splash-cta-line"></div>
         <span class="splash-cta-text">Click anywhere to enter</span>
       </div>
     </div>
@@ -176,6 +237,7 @@
   </div>
 
   <div id="main">
+    <canvas id="bg-canvas"></canvas>
     <div class="ambient-glow"></div>
     <div class="container">
 
@@ -183,16 +245,13 @@
         <div class="avatar-float">
           <div class="avatar-glow"></div>
           <img class="avatar-img" src="avatar.png" alt="leftpapi avatar" />
+          <span id="discord-status-dot" class="discord-status-dot offline" title="Loading status…"></span>
         </div>
-      </div>
-
-      <div id="discord-status-badge" class="discord-status-badge">
-        <span id="discord-status-dot" class="discord-status-dot offline"></span>
-        <span id="discord-status-word" class="discord-status-word">Loading status…</span>
       </div>
 
       <h1 class="hero-name">left<span>papi</span></h1>
       <p class="hero-title">GFX Designer &nbsp;·&nbsp; Coder &nbsp;·&nbsp; Content Creator</p>
+      <div class="age-badge">15 years old</div>
 
       <div class="about-card">
         <p>
@@ -216,22 +275,23 @@
         <div class="line"></div>
       </div>
 
-      <div class="gallery">
-        <div class="gallery-item featured" onclick="openLightbox('3C844809-218A-4AED-B64B-D6C15D88789D.jpeg', '')">
-          <div class="item-inner">
-            <img src="3C844809-218A-4AED-B64B-D6C15D88789D.jpeg" alt="LEFT GFX" />
+      <div class="carousel">
+        <div class="carousel-viewport">
+          <div class="carousel-track" id="carousel-track">
+            <div class="carousel-slide" onclick="openLightbox('3C844809-218A-4AED-B64B-D6C15D88789D.jpeg', '')">
+              <img src="3C844809-218A-4AED-B64B-D6C15D88789D.jpeg" alt="LEFT GFX" />
+            </div>
+            <div class="carousel-slide" onclick="openLightbox('IMG_0566.jpeg', '')">
+              <img src="IMG_0566.jpeg" alt="ZEN GFX" />
+            </div>
+            <div class="carousel-slide" onclick="openLightbox('2ECFA94F-99AC-4D7A-A23C-8D973ED8C9FA.jpeg', '')">
+              <img src="2ECFA94F-99AC-4D7A-A23C-8D973ED8C9FA.jpeg" alt="VOIDOPTIX Logo" />
+            </div>
           </div>
         </div>
-        <div class="gallery-item" onclick="openLightbox('IMG_0566.jpeg', '')">
-          <div class="item-inner">
-            <img src="IMG_0566.jpeg" alt="ZEN GFX" />
-          </div>
-        </div>
-        <div class="gallery-item" onclick="openLightbox('2ECFA94F-99AC-4D7A-A23C-8D973ED8C9FA.jpeg', '')">
-          <div class="item-inner">
-            <img src="2ECFA94F-99AC-4D7A-A23C-8D973ED8C9FA.jpeg" alt="VOIDOPTIX Logo" />
-          </div>
-        </div>
+        <button class="carousel-arrow prev" onclick="carouselMove(-1)" aria-label="Previous">&#10094;</button>
+        <button class="carousel-arrow next" onclick="carouselMove(1)" aria-label="Next">&#10095;</button>
+        <div class="carousel-dots" id="carousel-dots"></div>
       </div>
 
       <div class="discord-cta-card">
@@ -245,6 +305,9 @@
 
       <div class="links-row">
         <a href="https://www.roblox.com/users/5109684554/profile" target="_blank" rel="noopener noreferrer" class="link-btn roblox">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="m13.383 14.341-3.726-.958.959-3.726 3.726.959-.96 3.726zM4.913 0 0 19.088 19.088 24 24 4.912 4.912 0z"/>
+          </svg>
           Roblox Profile
         </a>
         <a href="https://youtube.com/@leftpapi" target="_blank" rel="noopener noreferrer" class="link-btn youtube">
@@ -260,6 +323,174 @@
   </div>
 
   <script>
+    // ---- Carousel ----
+    const carouselSlides = document.querySelectorAll('.carousel-slide');
+    const carouselTrack = document.getElementById('carousel-track');
+    const carouselDotsWrap = document.getElementById('carousel-dots');
+    let carouselIndex = 0;
+
+    carouselSlides.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => carouselGoTo(i));
+      carouselDotsWrap.appendChild(dot);
+    });
+
+    function carouselRender() {
+      carouselTrack.style.transform = `translateX(-${carouselIndex * 100}%)`;
+      document.querySelectorAll('.carousel-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === carouselIndex);
+      });
+    }
+
+    function carouselGoTo(i) {
+      carouselIndex = (i + carouselSlides.length) % carouselSlides.length;
+      carouselRender();
+    }
+
+    function carouselMove(delta) {
+      carouselGoTo(carouselIndex + delta);
+    }
+
+    // swipe support
+    let touchStartX = null;
+    const viewport = document.querySelector('.carousel-viewport');
+    viewport.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    viewport.addEventListener('touchend', (e) => {
+      if (touchStartX === null) return;
+      const diff = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(diff) > 40) carouselMove(diff < 0 ? 1 : -1);
+      touchStartX = null;
+    });
+
+    // ---- Background particle network ----
+    let bgStarted = false;
+    function startBackground() {
+      if (bgStarted) return;
+      bgStarted = true;
+
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let w, h, particles;
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = document.getElementById('main').scrollHeight;
+      }
+
+      function makeParticles() {
+        const count = Math.min(50, Math.floor((w * h) / 30000));
+        particles = Array.from({ length: count }, () => ({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.18,
+          vy: (Math.random() - 0.5) * 0.18,
+          r: Math.random() * 1.4 + 0.5,
+          tw: Math.random() * Math.PI * 2,
+          twSpeed: 0.01 + Math.random() * 0.015
+        }));
+      }
+
+      const orbs = [
+        { x: 0.25, y: 0.3, r: 260, vx: 0.00006, vy: 0.00004, phase: 0 },
+        { x: 0.75, y: 0.65, r: 300, vx: -0.00005, vy: 0.00005, phase: 2 },
+        { x: 0.5, y: 0.85, r: 220, vx: 0.00004, vy: -0.00006, phase: 4 }
+      ];
+      let t = 0;
+
+      resize();
+      makeParticles();
+      window.addEventListener('resize', () => { resize(); makeParticles(); });
+      setTimeout(() => { resize(); makeParticles(); }, 500);
+
+      function tick() {
+        ctx.clearRect(0, 0, w, h);
+        t += 1;
+
+        // slow drifting glow orbs
+        for (const o of orbs) {
+          const ox = (o.x + Math.sin(t * o.vx + o.phase) * 0.08) * w;
+          const oy = (o.y + Math.cos(t * o.vy + o.phase) * 0.08) * h;
+          const grad = ctx.createRadialGradient(ox, oy, 0, ox, oy, o.r);
+          grad.addColorStop(0, 'rgba(59,130,246,0.10)');
+          grad.addColorStop(1, 'rgba(59,130,246,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(ox, oy, o.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        for (const p of particles) {
+          p.x += p.vx; p.y += p.vy;
+          p.tw += p.twSpeed;
+          if (p.x < 0 || p.x > w) p.vx *= -1;
+          if (p.y < 0 || p.y > h) p.vy *= -1;
+        }
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const a = particles[i], b = particles[j];
+            const dx = a.x - b.x, dy = a.y - b.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 130) {
+              ctx.strokeStyle = `rgba(96,165,250,${0.07 * (1 - dist / 130)})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+            }
+          }
+        }
+        for (const p of particles) {
+          const twinkle = 0.25 + Math.sin(p.tw) * 0.15;
+          ctx.fillStyle = `rgba(147,197,253,${twinkle})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        requestAnimationFrame(tick);
+      }
+      tick();
+    }
+
+    // ---- Splash starfield ----
+    (function () {
+      const canvas = document.getElementById('splash-canvas');
+      const ctx = canvas.getContext('2d');
+      let w, h, stars;
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      function makeStars() {
+        const count = Math.min(60, Math.floor((w * h) / 22000));
+        stars = Array.from({ length: count }, () => ({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 1.3 + 0.4,
+          tw: Math.random() * Math.PI * 2,
+          twSpeed: 0.008 + Math.random() * 0.02
+        }));
+      }
+      resize(); makeStars();
+      window.addEventListener('resize', () => { resize(); makeStars(); });
+
+      function tick() {
+        ctx.clearRect(0, 0, w, h);
+        for (const s of stars) {
+          s.tw += s.twSpeed;
+          const alpha = 0.2 + Math.sin(s.tw) * 0.25;
+          ctx.fillStyle = `rgba(147,197,253,${Math.max(0, alpha)})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        requestAnimationFrame(tick);
+      }
+      tick();
+    })();
+
     function enter() {
       const splash = document.getElementById('splash');
       const main = document.getElementById('main');
@@ -268,6 +499,7 @@
         splash.style.display = 'none';
         main.style.display = 'block';
         requestAnimationFrame(() => { requestAnimationFrame(() => { main.classList.add('visible'); }); });
+        startBackground();
       }, 700);
     }
 
@@ -293,7 +525,6 @@
 
     async function updateDiscordStatus() {
       const dot = document.getElementById('discord-status-dot');
-      const word = document.getElementById('discord-status-word');
       try {
         const res = await fetch(`https://api.lanyard.rest/v1/users/${LANYARD_USER_ID}`, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -302,11 +533,11 @@
 
         const status = json.data.discord_status || 'offline';
         dot.className = 'discord-status-dot ' + status;
-        word.textContent = statusLabels[status] || status;
+        dot.title = statusLabels[status] || status;
       } catch (err) {
         console.error('Lanyard fetch failed:', err);
         dot.className = 'discord-status-dot offline';
-        word.textContent = 'Status unavailable';
+        dot.title = 'Status unavailable';
       }
     }
 
