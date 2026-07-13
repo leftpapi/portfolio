@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>leftpapi — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+  <!-- NOTE: Put your image files in the same folder as this HTML file,
+       or update the src paths below to match where your images are. -->
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      width: 100%;
+      background: #030308;
+      color: #fff;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* SPLASH SCREEN */
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      background: #030308;
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    #splash.exiting {
+      opacity: 0;
+      transform: scale(1.04);
+      pointer-events: none;
+    }
+
+    .splash-glow {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .splash-glow::after {
+      content: '';
+      width: min(600px, 90vw);
+      height: min(600px, 90vw);
+      border-radius: 50%;
+      background: rgba(37, 99, 235, 0.2);
+      filter: blur(120px);
+    }
+
+    .splash-grid {
+      position: absolute;
+      inset: 0;
+      opacity: 0.04;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(99,179,237,1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,179,237,1) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .splash-content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 24px;
+      animation: fadeUp 0.8s ease 0.15s both;
+    }
+
+    .splash-welcome {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(96,165,250,0.6);
+      margin-bottom: 32px;
+      font-weight: 500;
+      animation: pulseOpacity 3s ease-in-out infinite;
+    }
+
+    .splash-title {
+      font-size: clamp(56px, 15vw, 96px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .splash-title span { color: #60a5fa; }
+
+    .splash-subtitle {
+      color: rgba(255,255,255,0.4);
+      font-size: clamp(13px, 2vw, 16px);
+      margin-top: 24px;
+      letter-spacing: 0.05em;
+    }
+
+    .splash-cta {
+      margin-top: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      animation: pulseOpacity 2.5s ease-in-out infinite;
+    }
+
+    .splash-cta-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, transparent, rgba(96,165,250,0.6), transparent);
+    }
+
+    .splash-cta-text {
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+
+    /* MAIN CONTENT */
+    #main {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    #main.visible { opacity: 1; }
+
+    .ambient-glow {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      max-width: 100vw;
+      height: 400px;
+      background: rgba(37,99,235,0.1);
+      filter: blur(140px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 64px 20px 96px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* AVATAR */
+    .avatar-wrap {
+      margin-bottom: 24px;
+      position: relative;
+      animation: bounceDown 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s both;
+    }
+
+    .avatar-float {
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .avatar-glow {
+      position: absolute;
+      inset: 0;
+      background: rgba(59,130,246,0.2);
+      filter: blur(40px);
+      border-radius: 50%;
+      transform: scale(1.5);
+      pointer-events: none;
+    }
+
+    .avatar-img {
+      position: relative;
+      width: clamp(128px, 22vw, 176px);
+      height: clamp(128px, 22vw, 176px);
+      object-fit: contain;
+      filter: drop-shadow(0 0 30px rgba(59,130,246,0.5));
+      display: block;
+    }
+
+    /* HERO TEXT */
+    .hero-name {
+      font-size: clamp(48px, 12vw, 80px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 12px;
+      text-align: center;
+      animation: fadeUp 0.6s ease 0.35s both;
+    }
+
+    .hero-name span { color: #60a5fa; }
+
+    .hero-title {
+      color: rgba(255,255,255,0.5);
+      font-size: clamp(11px, 2vw, 14px);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeUp 0.6s ease 0.4s both;
+    }
+
+    /* ABOUT CARD */
+    .about-card {
+      width: 100%;
+      max-width: 640px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.03);
+      padding: 28px 32px;
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeUp 0.6s ease 0.45s both;
+    }
+
+    .about-card p {
+      color: rgba(255,255,255,0.75);
+      font-size: clamp(15px, 2vw, 17px);
+      line-height: 1.75;
+    }
+
+    .about-card .accent { color: #60a5fa; font-weight: 500; }
+
+    /* SKILLS */
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 64px;
+      animation: fadeUp 0.6s ease 0.55s both;
+    }
+
+    .skill-badge {
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.25);
+      color: #93c5fd;
+      letter-spacing: 0.04em;
+    }
+
+    /* SECTION DIVIDER */
+    .section-divider {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .section-divider .line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .section-divider h2 {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* GALLERY */
+    .gallery {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 64px;
+      animation: fadeUp 0.7s ease 0.7s both;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      cursor: zoom-in;
+      outline: 1px solid rgba(255,255,255,0.1);
+      outline-offset: -1px;
+      transition: outline-color 0.3s ease;
+    }
+
+    .gallery-item:hover { outline-color: rgba(59,130,246,0.45); }
+
+    .gallery-item.featured { grid-row: span 2; }
+
+    .item-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .gallery-item.featured .item-inner {
+      aspect-ratio: 1 / 1;
+      min-height: 300px;
+    }
+
+    .gallery-item:not(.featured) .item-inner { aspect-ratio: 4 / 3; }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .gallery-item:hover img { transform: scale(1.06); }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px 18px;
+    }
+
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+    .gallery-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #60a5fa;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .gallery-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .gallery-item.featured .gallery-title { font-size: 22px; }
+
+    /* DISCORD CTA */
+    .discord-cta-card {
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px;
+      border: 1px solid rgba(59,130,246,0.2);
+      background: rgba(59,130,246,0.05);
+      padding: 28px 32px;
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeUp 0.6s ease 0.82s both;
+    }
+
+    .discord-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 10px;
+    }
+
+    .discord-heading {
+      font-size: clamp(15px, 2vw, 18px);
+      font-weight: 500;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 20px;
+    }
+
+    .discord-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      background: #5865F2;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 0 24px rgba(88,101,242,0.35);
+    }
+
+    .discord-btn:hover {
+      background: #4752C4;
+      box-shadow: 0 0 36px rgba(88,101,242,0.55);
+    }
+
+    .discord-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    .discord-hint {
+      font-size: 12px;
+      color: rgba(255,255,255,0.22);
+      margin-top: 12px;
+    }
+
+    /* LINK BUTTONS */
+    .links-row {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 80px;
+      animation: fadeUp 0.6s ease 0.92s both;
+    }
+
+    @media (min-width: 480px) {
+      .links-row { flex-direction: row; }
+    }
+
+    .link-btn {
+      flex: 1;
+      text-align: center;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      transition: background 0.2s ease, color 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+    }
+
+    .link-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    .link-btn.roblox {
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.8);
+    }
+    .link-btn.roblox:hover { background: rgba(255,255,255,0.09); color: #fff; }
+
+    .link-btn.youtube {
+      border: 1px solid rgba(239,68,68,0.3);
+      background: rgba(239,68,68,0.05);
+      color: rgba(248,113,113,0.9);
+    }
+    .link-btn.youtube:hover { background: rgba(239,68,68,0.12); color: #fca5a5; }
+
+    /* FOOTER */
+    .footer {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+    }
+
+    /* LIGHTBOX */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0.95);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    #lightbox.open { opacity: 1; }
+
+    .lightbox-inner {
+      position: relative;
+      max-width: 900px;
+      width: 100%;
+      cursor: default;
+    }
+
+    #lightbox-img {
+      width: 100%;
+      max-height: 82vh;
+      object-fit: contain;
+      border-radius: 16px;
+      display: block;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -16px;
+      right: -16px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+
+    .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+    #lightbox-caption {
+      text-align: center;
+      color: rgba(255,255,255,0.45);
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    /* MOBILE */
+    @media (max-width: 560px) {
+      .gallery { grid-template-columns: 1fr; }
+      .gallery-item.featured { grid-row: span 1; }
+      .gallery-item.featured .item-inner { aspect-ratio: 1 / 1; min-height: unset; }
+      .gallery-item:not(.featured) .item-inner { aspect-ratio: 16 / 9; }
+      .gallery-overlay { opacity: 1; }
+      .container { padding: 48px 16px 80px; }
+      .about-card { padding: 22px 20px; }
+      .discord-cta-card { padding: 22px 20px; }
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounceDown {
+      0%   { opacity: 0; transform: translateY(-120px) scale(0.6); }
+      60%  { transform: translateY(12px) scale(1.05); }
+      80%  { transform: translateY(-6px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    @keyframes pulseOpacity {
+      0%, 100% { opacity: 0.5; }
+      50%       { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SPLASH SCREEN — click anywhere to enter -->
+  <div id="splash" onclick="enter()">
+    <div class="splash-glow"></div>
+    <div class="splash-grid"></div>
+    <div class="splash-content">
+      <div class="splash-welcome">Welcome</div>
+      <h1 class="splash-title">left<span>papi</span></h1>
+      <p class="splash-subtitle">GFX Designer · Coder · Content Creator</p>
+      <div class="splash-cta">
+        <div class="splash-cta-line"></div>
+        <span class="splash-cta-text">Click anywhere to enter</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <div class="lightbox-inner" onclick="event.stopPropagation()">
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+      <img id="lightbox-img" src="" alt="" />
+      <p id="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <!-- MAIN PORTFOLIO PAGE -->
+  <div id="main">
+    <div class="ambient-glow"></div>
+    <div class="container">
+
+      <!-- AVATAR — update src to your image filename -->
+      <div class="avatar-wrap">
+        <div class="avatar-float">
+          <div class="avatar-glow"></div>
+          <img class="avatar-img" src="roblox-avatar_1783959075368.png" alt="leftpapi avatar" />
+        </div>
+      </div>
+
+      <!-- NAME & TITLE -->
+      <h1 class="hero-name">left<span>papi</span></h1>
+      <p class="hero-title">GFX Designer &nbsp;·&nbsp; Coder &nbsp;·&nbsp; Content Creator</p>
+
+      <!-- ABOUT -->
+      <div class="about-card">
+        <p>
+          I create paid <span class="accent">graphic design commissions</span> and build things with
+          <span class="accent">Lua</span>, <span class="accent">HTML</span> &amp; <span class="accent">Python</span>.
+          I'm also a content creator on Roblox.
+        </p>
+      </div>
+
+      <!-- SKILLS -->
+      <div class="skills">
+        <span class="skill-badge">Lua</span>
+        <span class="skill-badge">HTML</span>
+        <span class="skill-badge">Python</span>
+        <span class="skill-badge">GFX Design</span>
+        <span class="skill-badge">Content Creator</span>
+      </div>
+
+      <!-- WORKS SECTION — update src to your image filenames -->
+      <div class="section-divider">
+        <div class="line"></div>
+        <h2>Selected Work</h2>
+        <div class="line"></div>
+      </div>
+
+      <div class="gallery">
+        <div class="gallery-item featured"
+             onclick="openLightbox('3C844809-218A-4AED-B64B-D6C15D88789D_1783959065837.jpeg', 'LEFT — 3D Scene GFX')">
+          <div class="item-inner">
+            <img src="3C844809-218A-4AED-B64B-D6C15D88789D_1783959065837.jpeg" alt="LEFT GFX" />
+            <div class="gallery-overlay">
+              <div class="gallery-label">3D Scene GFX</div>
+              <div class="gallery-title">LEFT</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery-item"
+             onclick="openLightbox('IMG_0566_1783959065837.jpeg', 'ZEN — Horror Text GFX')">
+          <div class="item-inner">
+            <img src="IMG_0566_1783959065837.jpeg" alt="ZEN GFX" />
+            <div class="gallery-overlay">
+              <div class="gallery-label">Horror Text GFX</div>
+              <div class="gallery-title">ZEN</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery-item"
+             onclick="openLightbox('2ECFA94F-99AC-4D7A-A23C-8D973ED8C9FA_1783959065837.jpeg', 'VOIDOPTIX — Logo Design')">
+          <div class="item-inner">
+            <img src="2ECFA94F-99AC-4D7A-A23C-8D973ED8C9FA_1783959065837.jpeg" alt="VOIDOPTIX Logo" />
+            <div class="gallery-overlay">
+              <div class="gallery-label">Logo Design</div>
+              <div class="gallery-title">VOIDOPTIX</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISCORD COMMISSION CTA -->
+      <div class="discord-cta-card">
+        <p class="discord-eyebrow">Want a design made?</p>
+        <p class="discord-heading">Message me on Discord</p>
+        <button class="discord-btn" onclick="copyDiscord()">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.082.114 18.105.134 18.12a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+          </svg>
+          <span id="discord-label">DM leftpapi on Discord</span>
+        </button>
+        <p class="discord-hint">Clicks copy my username to your clipboard</p>
+      </div>
+
+      <!-- ROBLOX & YOUTUBE LINKS -->
+      <div class="links-row">
+        <a href="https://www.roblox.com/users/5109684554/profile"
+           target="_blank" rel="noopener noreferrer"
+           class="link-btn roblox">
+          Roblox Profile
+        </a>
+        <a href="https://youtube.com/@leftpapi"
+           target="_blank" rel="noopener noreferrer"
+           class="link-btn youtube">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+          YouTube
+        </a>
+      </div>
+
+      <!-- FOOTER -->
+      <p class="footer">&copy; 2026 leftpapi</p>
+
+    </div>
+  </div>
+
+  <script>
+    function enter() {
+      const splash = document.getElementById('splash');
+      const main   = document.getElementById('main');
+      splash.classList.add('exiting');
+      setTimeout(() => {
+        splash.style.display = 'none';
+        main.style.display = 'block';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            main.classList.add('visible');
+          });
+        });
+      }, 700);
+    }
+
+    function openLightbox(src, caption) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox-caption').textContent = caption;
+      lb.style.display = 'flex';
+      requestAnimationFrame(() => lb.classList.add('open'));
+    }
+
+    function closeLightbox() {
+      const lb = document.getElementById('lightbox');
+      lb.classList.remove('open');
+      setTimeout(() => { lb.style.display = 'none'; }, 250);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    let copyTimeout;
+    function copyDiscord() {
+      navigator.clipboard.writeText('leftpapi').then(() => {
+        const label = document.getElementById('discord-label');
+        label.textContent = 'Copied! — leftpapi';
+        clearTimeout(copyTimeout);
+        copyTimeout = setTimeout(() => {
+          label.textContent = 'DM leftpapi on Discord';
+        }, 2000);
+      });
+    }
+  </script>
+
+</body>
+</html>
