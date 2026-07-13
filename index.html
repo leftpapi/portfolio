@@ -77,6 +77,12 @@
     .discord-status-dot.dnd { background: #ed4245; }
     .discord-status-dot.offline { background: #747f8d; }
 
+    .badge-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px;
+      margin-bottom: 40px;
+      animation: fadeUp 0.6s ease 0.42s both;
+    }
     .age-badge {
       display: inline-flex; align-items: center;
       padding: 5px 14px; border-radius: 999px;
@@ -84,8 +90,6 @@
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.1);
       color: rgba(255,255,255,0.5);
-      margin-bottom: 40px;
-      animation: fadeUp 0.6s ease 0.42s both;
     }
     .hero-name span { color: #60a5fa; }
     .hero-title { color: rgba(255,255,255,0.5); font-size: clamp(11px, 1.6vw, 14px); letter-spacing: 0.2em; text-transform: uppercase; text-align: center; margin-bottom: 18px; animation: fadeUp 0.6s ease 0.4s both; }
@@ -251,7 +255,10 @@
 
       <h1 class="hero-name">left<span>papi</span></h1>
       <p class="hero-title">GFX Designer &nbsp;·&nbsp; Coder &nbsp;·&nbsp; Content Creator</p>
-      <div class="age-badge">15 years old</div>
+      <div class="badge-row">
+        <div class="age-badge">15 years old</div>
+        <div class="age-badge">He/Him</div>
+      </div>
 
       <div class="about-card">
         <p>
