@@ -36,23 +36,67 @@
     #main { display: none; opacity: 0; transition: opacity 0.6s ease; }
     #main.visible { opacity: 1; }
     .ambient-glow { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 800px; max-width: 100vw; height: 400px; background: rgba(37,99,235,0.1); filter: blur(140px); border-radius: 50%; pointer-events: none; }
-    .container { position: relative; max-width: 960px; margin: 0 auto; padding: 64px 20px 96px; display: flex; flex-direction: column; align-items: center; }
+
+    /* ---- Container now scales nicely across phone / tablet / desktop ---- */
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 64px 20px 96px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .avatar-wrap { margin-bottom: 24px; position: relative; animation: bounceDown 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s both; }
     .avatar-float { animation: float 4s ease-in-out infinite; }
     .avatar-glow { position: absolute; inset: 0; background: rgba(59,130,246,0.2); filter: blur(40px); border-radius: 50%; transform: scale(1.5); pointer-events: none; }
-    .avatar-img { position: relative; width: clamp(128px, 22vw, 176px); height: clamp(128px, 22vw, 176px); object-fit: contain; filter: drop-shadow(0 0 30px rgba(59,130,246,0.5)); display: block; }
-    .hero-name { font-size: clamp(48px, 12vw, 80px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 12px; text-align: center; animation: fadeUp 0.6s ease 0.35s both; }
+    .avatar-img { position: relative; width: clamp(128px, 18vw, 176px); height: clamp(128px, 18vw, 176px); object-fit: contain; filter: drop-shadow(0 0 30px rgba(59,130,246,0.5)); display: block; }
+    .hero-name { font-size: clamp(48px, 9vw, 80px); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 12px; text-align: center; animation: fadeUp 0.6s ease 0.35s both; }
+
+    /* ---- Discord status badge (under avatar) ---- */
+    .discord-status-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s ease 0.3s both;
+    }
+    .discord-status-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #747f8d;
+      box-shadow: 0 0 8px rgba(116,127,141,0.6);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      flex-shrink: 0;
+    }
+    .discord-status-dot.online { background: #3ba55d; box-shadow: 0 0 8px rgba(59,165,93,0.7); }
+    .discord-status-dot.idle { background: #faa61a; box-shadow: 0 0 8px rgba(250,166,26,0.7); }
+    .discord-status-dot.dnd { background: #ed4245; box-shadow: 0 0 8px rgba(237,66,69,0.7); }
+    .discord-status-dot.offline { background: #747f8d; box-shadow: 0 0 8px rgba(116,127,141,0.6); }
+    .discord-status-word { font-size: 12px; font-weight: 500; letter-spacing: 0.04em; color: rgba(255,255,255,0.6); }
     .hero-name span { color: #60a5fa; }
-    .hero-title { color: rgba(255,255,255,0.5); font-size: clamp(11px, 2vw, 14px); letter-spacing: 0.2em; text-transform: uppercase; text-align: center; margin-bottom: 40px; animation: fadeUp 0.6s ease 0.4s both; }
+    .hero-title { color: rgba(255,255,255,0.5); font-size: clamp(11px, 1.6vw, 14px); letter-spacing: 0.2em; text-transform: uppercase; text-align: center; margin-bottom: 40px; animation: fadeUp 0.6s ease 0.4s both; }
     .about-card { width: 100%; max-width: 640px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.03); padding: 28px 32px; text-align: center; margin-bottom: 32px; animation: fadeUp 0.6s ease 0.45s both; }
-    .about-card p { color: rgba(255,255,255,0.75); font-size: clamp(15px, 2vw, 17px); line-height: 1.75; }
+    .about-card p { color: rgba(255,255,255,0.75); font-size: clamp(15px, 1.6vw, 17px); line-height: 1.75; }
     .about-card .accent { color: #60a5fa; font-weight: 500; }
-    .skills { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 64px; animation: fadeUp 0.6s ease 0.55s both; }
+    .skills { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 64px; max-width: 640px; animation: fadeUp 0.6s ease 0.55s both; }
     .skill-badge { padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); color: #93c5fd; letter-spacing: 0.04em; }
-    .section-divider { width: 100%; display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+    .section-divider { width: 100%; max-width: 640px; display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
     .section-divider .line { flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
     .section-divider h2 { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.4); font-weight: 500; white-space: nowrap; }
-    .gallery { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 64px; animation: fadeUp 0.7s ease 0.7s both; }
+
+    /* ---- Gallery: responsive grid, more columns on wider screens ---- */
+    .gallery {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 64px;
+      animation: fadeUp 0.7s ease 0.7s both;
+    }
     .gallery-item { position: relative; overflow: hidden; border-radius: 16px; cursor: zoom-in; outline: 1px solid rgba(255,255,255,0.1); outline-offset: -1px; transition: outline-color 0.3s ease; }
     .gallery-item:hover { outline-color: rgba(59,130,246,0.45); }
     .gallery-item.featured { grid-row: span 2; }
@@ -61,6 +105,7 @@
     .gallery-item:not(.featured) .item-inner { aspect-ratio: 4 / 3; }
     .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
     .gallery-item:hover img { transform: scale(1.06); }
+
     .discord-cta-card { width: 100%; max-width: 480px; border-radius: 20px; border: 1px solid rgba(59,130,246,0.2); background: rgba(59,130,246,0.05); padding: 28px 32px; text-align: center; margin-bottom: 48px; animation: fadeUp 0.6s ease 0.82s both; }
     .discord-eyebrow { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 10px; }
     .discord-heading { font-size: clamp(15px, 2vw, 18px); font-weight: 500; color: rgba(255,255,255,0.8); margin-bottom: 20px; }
@@ -83,6 +128,14 @@
     .lightbox-close { position: absolute; top: -16px; right: -16px; width: 40px; height: 40px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-family: inherit; }
     .lightbox-close:hover { background: rgba(255,255,255,0.2); }
     #lightbox-caption { text-align: center; color: rgba(255,255,255,0.45); font-size: 14px; margin-top: 16px; }
+
+    /* ---- Desktop / larger screens ---- */
+    @media (min-width: 900px) {
+      .container { max-width: 1040px; padding: 80px 32px 110px; }
+      .gallery { grid-template-columns: 2fr 1fr 1fr; max-width: 100%; }
+    }
+
+    /* ---- Mobile ---- */
     @media (max-width: 560px) {
       .gallery { grid-template-columns: 1fr; }
       .gallery-item.featured { grid-row: span 1; }
@@ -131,6 +184,11 @@
           <div class="avatar-glow"></div>
           <img class="avatar-img" src="avatar.png" alt="leftpapi avatar" />
         </div>
+      </div>
+
+      <div id="discord-status-badge" class="discord-status-badge">
+        <span id="discord-status-dot" class="discord-status-dot offline"></span>
+        <span id="discord-status-word" class="discord-status-word">Loading status…</span>
       </div>
 
       <h1 class="hero-name">left<span>papi</span></h1>
@@ -228,6 +286,32 @@
     }
 
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+    // ---- Discord live status via Lanyard ----
+    const LANYARD_USER_ID = '1209310750196113429';
+    const statusLabels = { online: 'Online', idle: 'Idle', dnd: 'Do Not Disturb', offline: 'Offline' };
+
+    async function updateDiscordStatus() {
+      const dot = document.getElementById('discord-status-dot');
+      const word = document.getElementById('discord-status-word');
+      try {
+        const res = await fetch(`https://api.lanyard.rest/v1/users/${LANYARD_USER_ID}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        if (!json.success) throw new Error('Lanyard success:false');
+
+        const status = json.data.discord_status || 'offline';
+        dot.className = 'discord-status-dot ' + status;
+        word.textContent = statusLabels[status] || status;
+      } catch (err) {
+        console.error('Lanyard fetch failed:', err);
+        dot.className = 'discord-status-dot offline';
+        word.textContent = 'Status unavailable';
+      }
+    }
+
+    updateDiscordStatus();
+    setInterval(updateDiscordStatus, 20000);
 
     let copyTimeout;
     function copyDiscord() {
